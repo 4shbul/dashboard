@@ -1,0 +1,173 @@
+{% extends 'layout.html' %}
+{% block content %}
+
+<!-- 🌙 Dark Mode Toggle -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index:9999;">
+  <label class="switch">
+    <input type="checkbox" id="darkToggle">
+    <span class="slider round"></span>
+  </label>
+</div>
+
+<div class="d-flex" style="min-height: 100vh;">
+  <!-- Sidebar -->
+  <div class="sidebar transition">
+    <h5>🚗 AdminSTNK</h5>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="#" class="nav-link active">🏠 Dashboard</a></li>
+      <li class="nav-item"><a href="{{ url_for('logout') }}" class="nav-link">🚪 Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Main -->
+  <div class="flex-fill bg-light px-5 py-4 fade-in-up">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 fade-in-up">
+      <div>
+        <h4 class="fw-bold">Selamat datang, {{ session.get('role')|capitalize }}</h4>
+        <small class="text-muted">Pantau status administrasi STNK & BPKB</small>
+      </div>
+      <div class="rounded-circle bg-secondary" style="width: 40px; height: 40px;"></div>
+    </div>
+
+    {% if session.get('wa_target') %}
+    <div class="alert alert-warning d-flex justify-content-between align-items-center shadow-sm fade-in-up">
+      <div>⚠️ {{ session.get('reminder') }}</div>
+      <a href="{{ session.pop('wa_target') }}" target="_blank" class="btn btn-sm btn-success">💬 Kirim WA</a>
+    </div>
+    {% endif %}
+
+    {% if data|length > 0 %}
+    <div class="row g-4 mb-4">
+
+      <!-- Card: Status Progres -->
+      <div class="col-md-4 fade-in-up delay-1">
+        <div class="card p-3 shadow-sm">
+          <h6 class="fw-semibold">📌 Status Progres</h6>
+          <ul class="list-group list-group-flush small">
+            {% for label, field in [
+              ("Sold", "STATUS SOLD"),
+              ("Input", "STATUS INPUT"),
+              ("Faktur", "STATUS PENGAJUAN FAKTUR"),
+              ("STNK", "STATUS PENERIMAAN STNK")
+            ] %}
+            {% set value = data[-1][field] %}
+            <li class="list-group-item d-flex justify-content-between">
+              {{ label }}:
+              <span class="badge {% if value == 'DONE' %}bg-success{% elif value == 'ON PROGRESS' %}bg-warning text-dark{% else %}bg-danger{% endif %}" title="{{ field }}">{{ value }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <!-- Card: Lead Time -->
+      <div class="col-md-4 fade-in-up delay-2">
+        <div class="card p-3 shadow-sm">
+          <h6 class="fw-semibold">⏱ Lead Time</h6>
+          <div class="mb-2 small">Sold → Input: {{ data[-1]["ACTUAL JARAK HARI ANTARA SOLD DAN SALES INPUT"] or "-" }} hari</div>
+          <div class="progress mb-2">
+            <div class="progress-bar bg-info" style="width: {{ (data[-1]["ACTUAL JARAK HARI ANTARA SOLD DAN SALES INPUT"]|int(default=1))*5 }}%;"></div>
+          </div>
+          <div class="mb-2 small">Faktur: {{ data[-1]["ACTUAL DATE (14 HARI KERJA)"] or "-" }}</div>
+          <div class="progress mb-2"><div class="progress-bar bg-success" style="width:80%"></div></div>
+          <div class="mb-2 small">STNK: {{ data[-1]["ACTUAL DATE (15 HARI KERJA)"] or "-" }}</div>
+          <div class="progress"><div class="progress-bar bg-warning" style="width:70%"></div></div>
+        </div>
+      </div>
+
+      <!-- Card: Info Konsumen -->
+      <div class="col-md-4 fade-in-up delay-3">
+        <div class="card p-3 shadow-sm">
+          <h6 class="fw-semibold">📇 Info Konsumen</h6>
+          <p class="mb-1"><strong>{{ data[-1]["NAMA STNK/BPKB"] }}</strong></p>
+          <p class="mb-1">Sales: {{ data[-1]["SALES"] }}</p>
+          <p class="mb-1">Supervisor: {{ data[-1]["SUPERVISOR"] }}</p>
+          <p class="mb-1">Model: {{ data[-1]["MODEL"] }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Tombol -->
+    <div class="text-end fade-in-up delay-4">
+      <a href="{{ url_for('edit_user', index=data|length -1) }}" class="btn btn-outline-primary btn-sm">✏️ Edit Data Terakhir</a>
+    </div>
+    {% endif %}
+
+    <!-- Form Input STNK -->
+    <div class="card-style mt-4 fade-in-up delay-4">
+      <h5 class="fw-bold mb-4">📝 Form Input STNK</h5>
+      <form method="POST" class="row g-4" novalidate>
+        {% for field in fields %}
+        <div class="col-md-6">
+          <label class="form-label">{{ field }}</label>
+          {% if "TGL" in field or "TANGGAL" in field or "DATE" in field %}
+          <input type="date" name="{{ field }}" class="form-control" required>
+          {% elif "STATUS" in field %}
+          <select name="{{ field }}" class="form-select" required>
+            <option value="">- Pilih -</option>
+            <option>NOT YET</option>
+            <option>ON PROGRESS</option>
+            <option>DONE</option>
+          </select>
+          {% else %}
+          <input type="text" name="{{ field }}" class="form-control" required>
+          {% endif %}
+        </div>
+        {% endfor %}
+        <div class="col-12 pt-3">
+          <button type="submit" class="btn btn-primary">💾 Simpan Data</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.getElementById('darkToggle');
+    if (localStorage.getItem('mode') === 'dark') {
+      document.body.classList.add('dark-mode');
+      toggle.checked = true;
+    }
+    toggle?.addEventListener('change', () => {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('mode', toggle.checked ? 'dark' : 'light');
+    });
+
+    const form = document.querySelector('form');
+    form?.addEventListener('submit', e => {
+      let valid = true;
+      form.querySelectorAll('[required]').forEach(el => {
+        if (!el.value.trim()) {
+          el.classList.add('is-invalid');
+          valid = false;
+        } else {
+          el.classList.remove('is-invalid');
+        }
+      });
+      if (!valid) e.preventDefault();
+    });
+
+    form?.querySelectorAll('[required]').forEach(el => {
+      el.addEventListener('input', () => el.classList.remove('is-invalid'));
+      el.addEventListener('change', () => el.classList.remove('is-invalid'));
+    });
+
+    {% if session.get('reminder') %}
+    Notification.requestPermission().then(p => {
+      if (p === "granted") {
+        new Notification("🔔 STNK Reminder", {
+          body: "{{ session['reminder'] }}",
+          icon: "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+        });
+      }
+    });
+    {% endif %}
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+  <div class="card p-4" style="width: 360px;">
+    <div class="text-center mb-4">
+      <div class="bg-primary rounded-circle d-inline-flex justify-content-center align-items-center" style="width: 60px; height: 60px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" fill="white" class="bi bi-person" viewBox="0 0 16 16">
+          <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm4-3a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/>
+          <path d="M14 14s-1-1.5-6-1.5S2 14 2 14s1-4 6-4 6 4 6 4z"/>
+        </svg>
+      </div>
+    </div>
+    <h5 class="text-center fw-bold mb-3">Masuk ke Dashboard</h5>
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" name="username" class="form-control" required>
+      </div>
+      <div class="mb-4">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">🔓 Login</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

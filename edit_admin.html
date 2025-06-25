@@ -1,0 +1,34 @@
+
+{% extends 'layout.html' %}
+{% block content %}
+
+<div class="container py-4 fade-in-up">
+  <h4 class="fw-bold mb-4">✏️ Edit Data</h4>
+
+  <form method="POST" class="row g-4" novalidate>
+    {% for field, value in data.items() %}
+    <div class="col-md-6">
+      <label class="form-label">{{ field }}</label>
+      {% if "TGL" in field or "TANGGAL" in field or "DATE" in field %}
+        <input type="date" name="{{ field }}" class="form-control" value="{{ value }}" required>
+      {% elif "STATUS" in field %}
+        <select name="{{ field }}" class="form-select" required>
+          <option value="">- Pilih -</option>
+          <option {% if value == 'NOT YET' %}selected{% endif %}>NOT YET</option>
+          <option {% if value == 'ON PROGRESS' %}selected{% endif %}>ON PROGRESS</option>
+          <option {% if value == 'DONE' %}selected{% endif %}>DONE</option>
+        </select>
+      {% else %}
+        <input type="text" name="{{ field }}" class="form-control" value="{{ value }}" required>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <div class="col-12 pt-3">
+      <button type="submit" class="btn btn-success">💾 Simpan Perubahan</button>
+      <a href="{{ url_for('admin_dashboard' if session.get('role') == 'admin' else 'user_dashboard') }}"
+         class="btn btn-secondary ms-2">🔙 Kembali</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

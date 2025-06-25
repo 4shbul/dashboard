@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% block content %}
+
+<div class="container py-4 fade-in-up">
+  <h4 class="fw-bold mb-4">📊 Dashboard Admin STNK</h4>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover small table-striped bg-white">
+      <thead class="table-primary text-center">
+        <tr>
+          <th>No</th>
+          <th>Nama</th>
+          <th>Sales</th>
+          <th>Supervisor</th>
+          <th>Model</th>
+          <th>Status Input</th>
+          <th>Status STNK</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in data %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ row["NAMA STNK/BPKB"] }}</td>
+          <td>{{ row["SALES"] }}</td>
+          <td>{{ row["SUPERVISOR"] }}</td>
+          <td>{{ row["MODEL"] }}</td>
+          <td>{{ row["STATUS INPUT"] }}</td>
+          <td>{{ row["STATUS PENERIMAAN STNK"] }}</td>
+          <td>
+            <a href="{{ url_for('edit_user', index=loop.index0) }}" class="btn btn-sm btn-outline-primary">✏️ Edit</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
